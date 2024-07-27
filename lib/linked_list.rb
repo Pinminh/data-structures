@@ -354,37 +354,26 @@ class LinkedList
   ## Searching
   public
 
-  def find_index(value)
-    found_index = 0
-    node = @head
-
-    until node.nil?
-      return found_index if node.value == value
-
-      found_index += 1
-      node = node.next
-    end
-
-    nil
-  end
-
-  alias index find_index
-
   def include?(value)
     found_index = find_index value
 
     !!found_index
   end
 
-  def find
-    node = @head
+  ##############################################################################
+  ## Enumerable
+  public
 
+  include Enumerable
+
+  def each
+    node = @head
     until node.nil?
-      return node.value if yield node.value
+      yield node.value
 
       node = node.next
     end
 
-    nil
+    to_enum
   end
 end
