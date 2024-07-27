@@ -41,7 +41,48 @@ class LinkedList
     @tail.value
   end
 
+  def first(amount = (no_args = true; 1))
+    return head if no_args
+    raise TypeError, 'no implicit conversion from nil to integer' if amount.nil?
+
+    amount = amount.to_i
+    amount = @size if amount > @size
+    raise ArgumentError, 'negative linked list size' if amount.negative?
+
+    values = LinkedList.new
+    node = @head
+    until amount.zero?
+      values.append node.value
+
+      node = node.next
+      amount -= 1
+    end
+
+    values
+  end
+
+  def last(amount = (no_args = true; 1))
+    return tail if no_args
+    raise TypeError, 'no implicit conversion from nil to integer' if amount.nil?
+
+    amount = amount.to_i
+    amount = @size if amount > @size
+    raise ArgumentError, 'negative linked list size' if amount.negative?
+
+    values = LinkedList.new
+    node = _at @size - amount
+    until node.nil?
+      values.append node.value
+
+      node = node.next
+    end
+
+    values
+  end
+
   def at(index)
+    raise TypeError, 'no implicit conversion from nil to integer' if index.nil?
+
     _at(index.to_i)&.value
   end
 
