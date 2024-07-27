@@ -14,6 +14,12 @@ AllCops:
 Style/FrozenStringLiteralComment:
   EnforcedStyle: never
 
+Style/Semicolon:
+  Enabled: false
+
+Style/IfUnlessModifier:
+  EnforcedStyle: never
+
 Metrics/MethodLength:
   Max: 20
 
