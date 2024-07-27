@@ -17,10 +17,66 @@ class LinkedList
   ##############################################################################
   ## Initialization
 
-  def initialize
-    @head = nil
-    @tail = nil
+  def initialize(*args, &block)
+    case args.count
+    when 0
+      _init_no_args
+    when 1
+      if args[0].is_a? Array
+        _init_by_array args[0]
+      elsif args[0].is_a? LinkedList
+        _init_by_list args[0]
+      else
+        raise TypeError, 'no implicit conversion from nil to integer' if args[0].nil?
+        raise TypeError, "no implicit conversion from #{args[0].class} to Integer" unless args[0].is_a? Integer
+
+        args[0] = args[0].to_i
+        raise ArgumentError, 'negative linked list size' if args[0].negative?
+
+        if block_given?
+          _init_by_block(args[0], &block)
+        else
+          _init_by_size(args[0])
+        end
+      end
+    when 2
+      _init_by_size args[0], args[1]
+    else
+      raise ArgumentError, "wrong number of arguments (given #{args.count}, expected 0..2)"
+    end
+  end
+
+  def self.[](*args)
+    list = LinkedList.new
+
+    args.each { |value| list.append value }
+    list
+  end
+
+  private
+
+  def _init_no_args
+    @head = @tail = nil
     @size = 0
+  end
+
+  def _init_by_array(array)
+    _init_no_args
+    array.each { |value| append value }
+  end
+
+  def _init_by_list(list)
+    _init_no_args
+    _init_by_array(list.to_a)
+  end
+
+  def _init_by_size(size, default = nil)
+    _init_no_args
+    size.times { append default }
+  end
+
+  def _init_by_block(size, &block)
+    size.times(&block)
   end
 
   ##############################################################################
@@ -120,7 +176,7 @@ class LinkedList
 
     node = @head
     until node.nil?
-      string += "#{node.value} >"
+      string += "#{node.value.inspect} >"
       node = node.next
     end
 
