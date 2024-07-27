@@ -25,9 +25,13 @@ class LinkedList
     elsif args[0].nil?
       raise TypeError, 'no implicit conversion from nil to integer' if args[0].nil?
     elsif args.length == 1 && !args[0].is_a?(Numeric)
-      _init_by_array args[0] if args[0].is_a? Array
-      _init_by_list args[0] if args[0].is_a? LinkedList
-      raise TypeError, "no implicit conversion from #{args[0].class} to Integer"
+      if args[0].is_a? Array
+        _init_by_array args[0]
+      elsif args[0].is_a? LinkedList
+        _init_by_list args[0]
+      else
+        raise TypeError, "no implicit conversion from #{args[0].class} to Integer"
+      end
     elsif args.length == 1 && args[0].is_a?(Numeric)
       args[0] = args[0].to_i
       raise ArgumentError, 'negative linked list size' if args[0].negative?
@@ -351,16 +355,6 @@ class LinkedList
   end
 
   ##############################################################################
-  ## Searching
-  public
-
-  def include?(value)
-    found_index = find_index value
-
-    !!found_index
-  end
-
-  ##############################################################################
   ## Enumerable
   public
 
@@ -375,5 +369,17 @@ class LinkedList
     end
 
     to_enum
+  end
+
+  ##############################################################################
+  ## Searching
+  public
+
+  alias index find_index
+
+  def include?(value)
+    found_index = find_index value
+
+    !!found_index
   end
 end
