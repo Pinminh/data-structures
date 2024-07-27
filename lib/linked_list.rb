@@ -136,12 +136,21 @@ class LinkedList
 
   def at(index)
     raise TypeError, 'no implicit conversion from nil to integer' if index.nil?
+    raise TypeError, "no implicit conversion of #{index.class} into Integer" unless index.is_a? Numeric
+
+    _at(index.to_i)&.value
+  end
+
+  def [](index)
+    raise TypeError, 'no implicit conversion from nil to integer' if index.nil?
+    raise TypeError, "no implicit conversion of #{index.class} into Integer" unless index.is_a? Numeric
 
     _at(index.to_i)&.value
   end
 
   private
 
+  # #_at returns a reference to node instead of a copy of value like #at
   def _at(index)
     return nil if empty? || index >= @size || index < -@size
 
@@ -305,6 +314,22 @@ class LinkedList
     @head = @tail = nil
     @size = 0
     self
+  end
+
+  def []=(index, value)
+    raise TypeError, 'no implicit conversion from nil to integer' if index.nil?
+    raise TypeError, "no implicit conversion of #{index.class} into Integer" unless index.is_a? Numeric
+
+    index = index.to_i
+    raise IndexError, "index #{index} too small for array; minimum: #{-@size}" if index < -@size
+
+    if index >= @size
+      insert index, value
+    else
+      _at(index).value = value
+    end
+
+    value
   end
 
   private
