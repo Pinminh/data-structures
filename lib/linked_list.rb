@@ -18,31 +18,28 @@ class LinkedList
   ## Initialization
 
   def initialize(*args, &block)
-    case args.count
-    when 0
+    if args.length > 2
+      raise ArgumentError, "wrong number of arguments (given #{args.length}, expected 0..2)"
+    elsif args.empty?
       _init_no_args
-    when 1
-      if args[0].is_a? Array
-        _init_by_array args[0]
-      elsif args[0].is_a? LinkedList
-        _init_by_list args[0]
-      else
-        raise TypeError, 'no implicit conversion from nil to integer' if args[0].nil?
-        raise TypeError, "no implicit conversion from #{args[0].class} to Integer" unless args[0].is_a? Integer
+    elsif args[0].nil?
+      raise TypeError, 'no implicit conversion from nil to integer' if args[0].nil?
+    elsif args.length == 1 && !args[0].is_a?(Numeric)
+      _init_by_array args[0] if args[0].is_a? Array
+      _init_by_list args[0] if args[0].is_a? LinkedList
+      raise TypeError, "no implicit conversion from #{args[0].class} to Integer"
+    elsif args.length == 1 && args[0].is_a?(Numeric)
+      args[0] = args[0].to_i
+      raise ArgumentError, 'negative linked list size' if args[0].negative?
 
-        args[0] = args[0].to_i
-        raise ArgumentError, 'negative linked list size' if args[0].negative?
+      block_given? ? _init_by_block(args[0], &block) : _init_by_size(args[0])
+    elsif args.length == 2
+      raise TypeError, "no implicit conversion from #{args[0].class} to Integer" unless args[0].is_a? Numeric
 
-        if block_given?
-          _init_by_block(args[0], &block)
-        else
-          _init_by_size(args[0])
-        end
-      end
-    when 2
+      args[0] = args[0].to_i
+      raise ArgumentError, 'negative linked list size' if args[0].negative?
+
       _init_by_size args[0], args[1]
-    else
-      raise ArgumentError, "wrong number of arguments (given #{args.count}, expected 0..2)"
     end
   end
 
@@ -75,8 +72,9 @@ class LinkedList
     size.times { append default }
   end
 
-  def _init_by_block(size, &block)
-    size.times(&block)
+  def _init_by_block(size)
+    _init_no_args
+    size.times { |index| append(yield index) }
   end
 
   ##############################################################################
