@@ -74,17 +74,19 @@ class LinkedList
   public
 
   def to_s
-    string = ''
-    return string if empty?
+    string = '*'
+    return '* >nil' if empty?
 
     node = @head
     until node.nil?
-      string += "( #{node.value} ) -> "
+      string += "#{node.value} >"
       node = node.next
     end
 
     "#{string}nil"
   end
+
+  alias inspect to_s
 
   def to_a
     values = []
@@ -252,5 +254,17 @@ class LinkedList
     found_index = find_index value
 
     !!found_index
+  end
+
+  def find
+    node = @head
+
+    until node.nil?
+      return node.value if yield node.value
+
+      node = node.next
+    end
+
+    nil
   end
 end
