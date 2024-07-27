@@ -25,3 +25,6 @@ Metrics/MethodLength:
 
 Metrics/AbcSize:
   Enabled: false
+
+Lint/RedundanceStringCoercion:
+  Enabled: false

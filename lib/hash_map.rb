@@ -63,6 +63,8 @@ class HashMap
     index = hash key
     list = @buckets[index]
 
+    return nil if list.nil? || list.empty?
+
     list_index = list.find_index { |k, _| k == key }
     return nil if list_index.nil?
 
@@ -102,7 +104,7 @@ class HashMap
     @buckets.each do |list|
       next if list.nil? || list.empty?
 
-      list.each { |key, value| string += "\"#{key}\": #{value}, " }
+      list.each { |key, value| string += "'#{key}': #{value}, " }
     end
 
     "#{string.slice(0..-3)} }"
