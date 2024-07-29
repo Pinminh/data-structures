@@ -42,6 +42,15 @@ class RedBlackTree
     format_tree
   end
 
+  def insert(key, value)
+    node = Node.new(key, value)
+    bst_insert node
+    fix_insertion node
+    self
+  end
+
+  private
+
   # Recursively turn tree into string
   def format_tree(node = @root, prefix = '', output = '', is_left: true)
     unless !node.right || node.right.sentinel?
@@ -59,13 +68,6 @@ class RedBlackTree
     end
 
     output
-  end
-
-  def insert(key, value)
-    node = Node.new(key, value)
-    bst_insert node
-    fix_insertion node
-    self
   end
 
   # Insert node with no account of colors and rotations
