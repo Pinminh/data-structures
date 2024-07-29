@@ -1,7 +1,7 @@
-require_relative 'redblack_tree'
 require_relative 'redblack_node'
 
 class RedBlackTree
+  # External nodes of red-black tree, act as black leafs
   class NilNode < Node
     def initialize
       super(key: nil, value: nil)
