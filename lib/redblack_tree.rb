@@ -8,12 +8,12 @@ class RedBlackTree
 
     attr_accessor :key, :value, :color, :left, :right, :parent
 
-    def initialize(key: 0, value: nil, color: BlACK, is_nil: false)
-      @key = is_nil ? nil : key
+    def initialize(key: 0, value: nil, color: BlACK, is_sentinel: false)
+      @key = is_sentinel ? nil : key
       @value = value
       @color = color
 
-      pointer = is_nil ? nil : RedBlackTree::NIL
+      pointer = is_sentinel ? nil : RedBlackTree::NIL
       @left = @right = @parent = pointer
     end
 
@@ -31,7 +31,7 @@ class RedBlackTree
   end
 
   # Universal sentinel (nil) node
-  NIL = Node.new(is_nil: true)
+  NIL = Node.new(is_sentinel: true)
 
   def initialize
     @root = RedBlackTree::NIL
@@ -64,5 +64,45 @@ class RedBlackTree
 
     node.left = node.right = RedBlackTree::NIL
     node.color = Node::RED
+  end
+
+  # Assume that node has a non-nil right child
+  def rotate_left(node)
+    rchild = node.right
+
+    node.right = rchild.left
+    rchild.left.parent = node unless rchild.left.sentinel?
+
+    if node.parent.sentinel?
+      @root = rchild
+    elsif node.parent.left == node
+      node.parent.left = rchild
+    else
+      node.parent.right = rchild
+    end
+    rchild.parent = node.parent
+
+    rchild.left = node
+    node.parent = rchild
+  end
+
+  # Assume that node has a non-nil left child
+  def rotate_right(node)
+    lchild = node.left
+
+    node.left = lchild.right
+    lchild.right.parent = node unless lchild.right.sentinel?
+
+    if node.parent.sentinel?
+      @root = lchild
+    elsif node.parent.left == node
+      node.parent.left = lchild
+    else
+      node.parent.right = lchild
+    end
+    lchild.parent = node.parent
+
+    lchild.right = node
+    node.parent = lchild
   end
 end
