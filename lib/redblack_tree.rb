@@ -1,3 +1,4 @@
+# Red-black tree implementation
 class RedBlackTree
   # Red-black tree's definition of node with special nil node value
   class Node
@@ -8,13 +9,13 @@ class RedBlackTree
 
     attr_accessor :key, :value, :color, :left, :right, :parent
 
-    def initialize(key: 0, value: nil, color: BlACK, is_sentinel: false)
+    def initialize(key = 0, value = nil, color = RED, is_sentinel: false)
       @key = is_sentinel ? nil : key
       @value = value
-      @color = color
+      @color = is_sentinel ? BLACK : color
 
-      pointer = is_sentinel ? nil : RedBlackTree::NIL
-      @left = @right = @parent = pointer
+      nil_pointer = is_sentinel ? nil : RedBlackTree::NIL
+      @left = @right = @parent = nil_pointer
     end
 
     def grandparent
@@ -37,11 +38,34 @@ class RedBlackTree
     @root = RedBlackTree::NIL
   end
 
-  # Tree printing
-  def pretty_print(node: @root, prefix: '', is_left: true)
-    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
-    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
-    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
+  def to_s
+    format_tree
+  end
+
+  # Recursively turn tree into string
+  def format_tree(node = @root, prefix = '', output = '', is_left: true)
+    unless !node.right || node.right.sentinel?
+      format_tree(node.right, "#{prefix}#{is_left ? '│   ' : '    '}",
+                  output, is_left: false)
+    end
+
+    entry = node.color == Node::BLACK ? "\e[1m\e[30m" : "\e[1m\e[31m"
+    entry << "#{node.key}\e[0m" << "(#{node.value})"
+    output << "#{prefix}#{is_left ? '└── ' : '┌── '}#{entry}\n"
+
+    unless !node.left || node.left.sentinel?
+      format_tree(node.left, "#{prefix}#{is_left ? '    ' : '│   '}",
+                  output, is_left: true)
+    end
+
+    output
+  end
+
+  def insert(key, value)
+    node = Node.new(key, value)
+    bst_insert node
+    fix_insertion node
+    self
   end
 
   # Insert node with no account of colors and rotations
@@ -49,7 +73,9 @@ class RedBlackTree
     cursor = @root
     parent = RedBlackTree::NIL
     until cursor.sentinel?
+      print "#{cursor} \n"
       parent = cursor
+      puts "newkey=#{node.key}, curkey=#{cursor.key}"
       cursor = node < cursor ? cursor.left : cursor.right
     end
 
@@ -64,6 +90,55 @@ class RedBlackTree
 
     node.left = node.right = RedBlackTree::NIL
     node.color = Node::RED
+  end
+
+  # Restore red-black properties after insertion
+  def fix_insertion(inserted_node)
+    cursor = inserted_node
+    while cursor.parent.color == Node::RED
+      # When parent of cursor is a left child
+      if cursor.parent == cursor.grandparent.left
+        cursor_uncle = cursor.grandparent.right
+        # Case 1: if uncle is RED, pass color BLACK down
+        if cursor_uncle.color == Node::RED
+          cursor_uncle.color = cursor.parent.color = Node::BLACK
+          cursor.grandparent.color = Node::RED
+          cursor = cursor.grandparent
+        else
+          # Case 2 (falls through to case 3):
+          # if cursor is a right child, transform situation into case 3
+          if cursor == cursor.parent.right
+            cursor = cursor.parent
+            rotate_left cursor
+          end
+          # Case 3: cursor is guaranteed to be a left child,
+          # distribute RED under BLACK parent (in rotated configuration)
+          cursor.parent.color = Node::BLACK
+          cursor.grandparent.color = Node::RED
+          rotate_right cursor.grandparent
+        end
+      # When parent of cursor is a right child,
+      # this is symmetrical to 3 cases above,
+      # meaning that it is exactly identical, except left right exchanged
+      else
+        cursor_uncle = cursor.grandparent.left
+        if cursor_uncle.color == Node::RED
+          cursor_uncle.color = cursor.parent.color = Node::BLACK
+          cursor.grandparent.color = Node::RED
+          cursor = cursor.grandparent
+        else
+          if cursor == cursor.parent.left
+            cursor = cursor.parent
+            rotate_right cursor
+          end
+          cursor.parent.color = Node::BLACK
+          cursor.grandparent.color = Node::RED
+          rotate_left cursor.grandparent
+        end
+      end
+    end
+    # Loop terminated, but root color is not guranteed
+    @root.color = Node::BLACK
   end
 
   # Assume that node has a non-nil right child
