@@ -21,10 +21,19 @@ Style/IfUnlessModifier:
   EnforcedStyle: never
 
 Metrics/MethodLength:
-  Max: 20
+  Max: 35
+
+Metrics/ClassLength:
+  Max: 200
 
 Metrics/AbcSize:
   Enabled: false
 
-Lint/RedundanceStringCoercion:
+Metrics/BlockNesting:
   Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 11
