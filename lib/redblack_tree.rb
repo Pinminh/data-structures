@@ -42,9 +42,29 @@ class RedBlackTree
     format_tree
   end
 
+  alias inspect to_s
+
   def insert(key, value)
     node = Node.new(key, value)
-    bst_insert node
+
+    cursor = @root
+    parent = RedBlackTree::NIL
+    until cursor.sentinel?
+      print "#{cursor} \n"
+      parent = cursor
+      cursor = node < cursor ? cursor.left : cursor.right
+      raise ArgumentError, "key #{key} duplicated in tree" if node == cursor
+    end
+
+    node.parent = parent
+    if parent.sentinel?
+      @root = node
+    elsif node < parent
+      parent.left = node
+    else
+      parent.right = node
+    end
+
     fix_insertion node
     self
   end
@@ -68,30 +88,6 @@ class RedBlackTree
     end
 
     output
-  end
-
-  # Insert node with no account of colors and rotations
-  def bst_insert(node)
-    cursor = @root
-    parent = RedBlackTree::NIL
-    until cursor.sentinel?
-      print "#{cursor} \n"
-      parent = cursor
-      puts "newkey=#{node.key}, curkey=#{cursor.key}"
-      cursor = node < cursor ? cursor.left : cursor.right
-    end
-
-    node.parent = parent
-    if parent.sentinel?
-      @root = node
-    elsif node < parent
-      parent.left = node
-    else
-      parent.right = node
-    end
-
-    node.left = node.right = RedBlackTree::NIL
-    node.color = Node::RED
   end
 
   # Restore red-black properties after insertion
