@@ -34,8 +34,23 @@ class RedBlackTree
   # Universal sentinel (nil) node
   NIL = Node.new(is_sentinel: true)
 
-  def initialize
-    @root = RedBlackTree::NIL
+  def initialize(array = nil)
+    if array.nil?
+      @root = RedBlackTree::NIL
+      return
+    end
+
+    raise TypeError, "no implicit conversion of #{array.class} into #{Array}" unless array.is_a? Array
+
+    tree = RedBlackTree[*array]
+    @root = tree.instance_variable_get :@root
+  end
+
+  # Create tree with an array, using index as keys
+  def self.[](*args)
+    tree = RedBlackTree.new
+    args.each_with_index { |val, idx| tree.insert(idx, val) }
+    tree
   end
 
   def to_s
