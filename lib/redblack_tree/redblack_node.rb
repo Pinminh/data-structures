@@ -13,6 +13,14 @@ class RedBlackTree
       @left = @right = @parent = nil
     end
 
+    def self.black?(color_value)
+      color_value == BLACK
+    end
+
+    def self.red?(color_value)
+      color_value == RED
+    end
+
     def black?
       @color == BLACK
     end

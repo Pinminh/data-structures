@@ -58,32 +58,37 @@ class RedBlackTree
     self
   end
 
-  def delete_node(target)
-    replaced_node = target
-    replaced_color = target.color
-    replacing_node = replaced_node.color
+  def delete_node(target_node)
+    replaced_node = target_node
+    replaced_color = target_node.color
+    replacing_node = nil
 
-    if target.left.sentinel?
-      replacing_node = target.right
-      transplant_to target, target.right
-    elsif target.right.sentinel?
-      replacing_node = target.left
-      transplate_to target, target.left
+    if target_node.left.sentinel?
+      replacing_node = target_node.right
+      transplant_to target_node, target_node.right
+    elsif target_node.right.sentinel?
+      replacing_node = target_node.left
+      transplant_to target_node, target_node.left
     else
-      replaced_node = minimum target.right
+      replaced_node = minimum target_node.right
       replaced_color = replaced_node.color
       replacing_node = replaced_node.right
 
-      unless target.right.sentinel?
+      unless target_node.right.sentinel?
         transplant_to replaced_node, replacing_node
-        replaced_node.right = target.right
-        target.right.parent = replaced_node
+        replaced_node.right = target_node.right
+        target_node.right.parent = replaced_node
       end
-      transplant_to target, replaced_node
-      replaced_node.left = target.left
-      target.left.parent = replaced_node
-      replaced_node.color = target.color
+      transplant_to target_node, replaced_node
+      replaced_node.left = target_node.left
+      target_node.left.parent = replaced_node
+      replaced_node.color = target_node.color
     end
+
+    # When the original color of replaced node is black,
+    # several red-black properties have been violated
+    fix_deletion replacing_node if Node.black? replaced_color
+    self
   end
 
   def search_node(key, node = @root)
@@ -196,10 +201,82 @@ class RedBlackTree
     @root.blacken
   end
 
+  # Restore red-black properties after deletion
+  # deepblack_node is a pointer to node that has additional black color.
+  # The additional black color is not a stored attribute, it is only identified
+  # by the act of being pointed to by deepblack_node
+  def fix_deletion(deepblack_node)
+    until deepblack_node == @root || deepblack_node.red?
+      # When replacing node is a left child
+      if deepblack_node.left_child?
+        sibling = deepblack_node.parent.right
+        # Case 1: if sibling of deepblack_node is red,
+        # turn this situation into case 2 (fall through) where sibling is black
+        if sibling.red?
+          sibling.parent.redden
+          sibling.blacken
+          rotate_left sibling.parent
+          sibling = deepblack_node.parent.right
+        end
+        # Case 2: if the sibling has two black children,
+        # transfer additional black color upwards, which interate the next loop
+        if sibling.left.black? && sibling.right.black?
+          sibling.redden
+          deepblack_node = deepblack_node.parent
+        # Case 3: if sibling's right child is black,
+        # turn this situation into case 4 (fall through),
+        # in which the sibling's right child is red instead
+        else
+          if sibling.right.black?
+            sibling.redden
+            sibling.left.blacken
+            rotate_right sibling
+            sibling = deepblack_node.parent.right
+          end
+          # Case 4: sibling's right child is now red,
+          # vanish additional black color to restore red-black properties
+          sibling.color = sibling.parent.color
+          sibling.parent.blacken
+          sibling.right.blacken
+          rotate_left sibling.parent
+          # Terminate the next loop by going straight to root
+          deepblack_node = @root
+        end
+      # When replacing node is a right child,
+      # this is the same to 4 cases above, only left right exchanged
+      else
+        sibling = deepblack_node.parent.left
+        if sibling.red?
+          sibling.parent.redden
+          sibling.blacken
+          rotate_right sibling.parent
+          sibling = deepblack_node.parent.left
+        end
+        if sibling.right.black? && sibling.left.black?
+          sibling.redden
+          deepblack_node = deepblack_node.parent
+        else
+          if sibling.left.black?
+            sibling.redden
+            sibling.right.blacken
+            rotate_left sibling
+            sibling = deepblack_node.parent.left
+          end
+          sibling.color = sibling.parent.color
+          sibling.parent.blacken
+          sibling.left.blacken
+          rotate_right sibling.parent
+          deepblack_node = @root
+        end
+      end
+    end
+    deepblack_node.blacken
+  end
+
   # Replace subtree root with another, dest_node can be nil node,
   # and this nil node is also updated with reference to parent
   def transplant_to(dest_node, src_node)
-    if dest_node.sentinel?
+    if dest_node.parent.sentinel?
       @root = src_node
     elsif dest_node.left_child?
       dest_node.parent.left = src_node
@@ -207,6 +284,7 @@ class RedBlackTree
       dest_node.parent.right = src_node
     end
     src_node.parent = dest_node.parent
+    nil
   end
 
   # Assume that node has a non-nil right child
