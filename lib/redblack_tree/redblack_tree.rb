@@ -58,6 +58,46 @@ class RedBlackTree
     self
   end
 
+  def search_node(key, node = @root)
+    until node.sentinel? || node.key == key
+      node = node.left if key < node.key
+      node = node.right if key > node.key
+    end
+    node
+  end
+
+  def maximum(node = @root)
+    node = node.right until node.right.sentinel?
+    node
+  end
+
+  def minimum(node = @root)
+    node = node.left until node.left.sentinel?
+    node
+  end
+
+  def successor(node)
+    return minimum node.right unless node.right.sentinel?
+
+    parent = node.parent
+    until parent.sentinel? || parent.left == node
+      node = parent
+      parent = node.parent
+    end
+    parent
+  end
+
+  def predecessor(node)
+    return maximum node.left unless node.left.sentinel?
+
+    parent = node.parent
+    until parent.sentinel? || parent.right == node
+      node = parent
+      parent = node.parent
+    end
+    parent
+  end
+
   private
 
   # Recursively turn tree into string
