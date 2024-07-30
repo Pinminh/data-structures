@@ -58,6 +58,34 @@ class RedBlackTree
     self
   end
 
+  def delete_node(target)
+    replaced_node = target
+    replaced_color = target.color
+    replacing_node = replaced_node.color
+
+    if target.left.sentinel?
+      replacing_node = target.right
+      transplant_to target, target.right
+    elsif target.right.sentinel?
+      replacing_node = target.left
+      transplate_to target, target.left
+    else
+      replaced_node = minimum target.right
+      replaced_color = replaced_node.color
+      replacing_node = replaced_node.right
+
+      unless target.right.sentinel?
+        transplant_to replaced_node, replacing_node
+        replaced_node.right = target.right
+        target.right.parent = replaced_node
+      end
+      transplant_to target, replaced_node
+      replaced_node.left = target.left
+      target.left.parent = replaced_node
+      replaced_node.color = target.color
+    end
+  end
+
   def search_node(key, node = @root)
     until node.sentinel? || node.key == key
       node = node.left if key < node.key
@@ -166,6 +194,19 @@ class RedBlackTree
     end
     # Loop terminated, but root color is not guranteed
     @root.blacken
+  end
+
+  # Replace subtree root with another, dest_node can be nil node,
+  # and this nil node is also updated with reference to parent
+  def transplant_to(dest_node, src_node)
+    if dest_node.sentinel?
+      @root = src_node
+    elsif dest_node.left_child?
+      dest_node.parent.left = src_node
+    else
+      dest_node.parent.right = src_node
+    end
+    src_node.parent = dest_node.parent
   end
 
   # Assume that node has a non-nil right child
