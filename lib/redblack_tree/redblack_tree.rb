@@ -91,6 +91,38 @@ class RedBlackTree
     self
   end
 
+  def height(start_node = @root)
+    return nil if start_node.sentinel?
+
+    queue = []
+    queue.push start_node
+    height = -1
+
+    until queue.empty?
+      queue.length.times do
+        node = queue.shift
+        queue.push node.left unless node.left.sentinel?
+        queue.push node.right unless node.right.sentinel?
+      end
+      height += 1
+    end
+    height
+  end
+
+  def depth(node)
+    depth = 0
+    until node.parent.sentinel?
+      node = node.parent
+      depth += 1
+    end
+    depth
+  end
+
+  def balanced?(start_node = @root)
+    factor = height(start_node.left) - height(start_node.right)
+    factor.abs <= 1
+  end
+
   def search_node(key, node = @root)
     until node.sentinel? || node.key == key
       node = node.left if key < node.key
