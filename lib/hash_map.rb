@@ -1,4 +1,4 @@
-require_relative 'linked_list'
+require_relative 'linked_list/linked_list'
 
 # Custom hashed map with chaining collisions.
 # The growing buckets is coded in C fashion, since Ruby's array out-of-bound

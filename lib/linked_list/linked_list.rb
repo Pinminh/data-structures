@@ -1,22 +1,7 @@
+require_relative 'linked_list_node'
+
 # Singly linked list with array-like interface
 class LinkedList
-  # Since variable is a reference for object in Ruby, @next acts like a pointer.
-  # There's no need for deallocating them too.
-  class Node
-    def initialize(value, next_node = nil)
-      @value = value
-      @next = next_node
-    end
-
-    attr_accessor :value, :next
-
-    def no_next?
-      @next.nil?
-    end
-  end
-  ##############################################################################
-  ## Initialization
-
   def initialize(*args, &block)
     if args.length > 2
       raise ArgumentError, "wrong number of arguments (given #{args.length}, expected 0..2)"
@@ -81,8 +66,6 @@ class LinkedList
     size.times { |index| append(yield index) }
   end
 
-  ##############################################################################
-  ## Accessibility
   public
 
   attr_reader :size
@@ -169,17 +152,11 @@ class LinkedList
     node
   end
 
-  ##############################################################################
-  ## Inspecting
   public
 
   def empty?
     @head.nil? && @tail.nil? && @size.zero?
   end
-
-  ##############################################################################
-  ## Conversion
-  public
 
   def to_s
     string = '*'
@@ -207,10 +184,6 @@ class LinkedList
 
     values
   end
-
-  ##############################################################################
-  ## Modification
-  public
 
   def append(value)
     appended_node = Node.new value
@@ -354,8 +327,6 @@ class LinkedList
     @size += 1
   end
 
-  ##############################################################################
-  ## Enumerable
   public
 
   include Enumerable
@@ -370,10 +341,6 @@ class LinkedList
 
     to_enum
   end
-
-  ##############################################################################
-  ## Searching
-  public
 
   alias index find_index
 
