@@ -131,6 +131,66 @@ class RedBlackTree
     parent
   end
 
+  def level_order(start_node = @root)
+    queue = []
+    queue.push start_node
+
+    until queue.empty?
+      node = queue.shift
+      queue.push node.left unless node.left.sentinel?
+      queue.push node.right unless node.right.sentinel?
+
+      yield node.key, node.value, node.color
+    end
+    self
+  end
+
+  def inorder(start_node = @root)
+    node = minimum start_node
+
+    until node.sentinel?
+      yield node.key, node.value, node.color
+      node = successor node
+    end
+    self
+  end
+
+  def preorder(start_node = @root)
+    stack = []
+    stack.push start_node
+
+    until stack.empty?
+      node = stack.pop
+      stack.push node.right unless node.right.sentinel?
+      stack.push node.left unless node.left.sentinel?
+
+      yield node.key, node.value, node.color
+    end
+    self
+  end
+
+  def postorder(start_node = @root)
+    stack = []
+    last_node = @sentinel
+    node = start_node
+
+    until stack.empty? && node.sentinel?
+      if node.sentinel?
+        peek_node = stack.last
+        if !peek_node.right.sentinel? && peek_node.right != last_node
+          node = peek_node.right
+        else
+          last_node = stack.pop
+          yield peek_node.key, peek_node.value, peek_node.color
+        end
+      else
+        stack.push node
+        node = node.left
+      end
+    end
+    self
+  end
+
   private
 
   # Recursively turn tree into string
