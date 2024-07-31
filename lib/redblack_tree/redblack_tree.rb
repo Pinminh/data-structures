@@ -39,7 +39,6 @@ class RedBlackTree
     cursor = @root
     parent = @sentinel
     until cursor.sentinel?
-      print "#{cursor} \n"
       parent = cursor
       cursor = node < cursor ? cursor.left : cursor.right
       raise ArgumentError, "key #{key} duplicated in tree" if node == cursor
