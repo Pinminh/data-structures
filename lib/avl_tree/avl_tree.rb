@@ -9,24 +9,30 @@ class AVLTree
     @root = @sentinel
   end
 
-  def search_node(key)
-    cursor = @root
-    until cursor.sentinel?
-      return cursor if cursor.key == key
-
-      cursor = key < cursor.key ? cursor.left : cursor.right
+  def self.[](*values)
+    tree = AVLTree.new
+    values.each_with_index do |value, index|
+      tree.insert index, value
     end
-    nil
+    tree
   end
 
-  def minimum(node = @root)
-    node = node.left until node.no_left?
-    node
+  def to_s
+    format_tree
   end
 
-  def maximum(node = @root)
-    node = node.right until node.no_right?
-    node
+  alias inspect to_s
+
+  def search(key)
+    search_node(key)&.value
+  end
+
+  def minimum
+    minimum_node.value
+  end
+
+  def maximum
+    maximum_node.value
   end
 
   def insert(key, value = key)
@@ -57,7 +63,35 @@ class AVLTree
     self
   end
 
-  def delete(node)
+  def delete(key)
+    node = search_node key
+    delete_node node
+    node&.value
+  end
+
+  private
+
+  def search_node(key)
+    cursor = @root
+    until cursor.sentinel?
+      return cursor if cursor.key == key
+
+      cursor = key < cursor.key ? cursor.left : cursor.right
+    end
+    nil
+  end
+
+  def minimum_node(node = @root)
+    node = node.left until node.no_left?
+    node
+  end
+
+  def maximum_node(node = @root)
+    node = node.right until node.no_right?
+    node
+  end
+
+  def delete_node(node)
     if node.no_right?
       affected_node = node.left
       transplant_to node, node.left
@@ -177,12 +211,6 @@ class AVLTree
     left_node.update_height
     nil
   end
-
-  def to_s
-    format_tree
-  end
-
-  alias inspect to_s
 
   # Recursively turn tree into string
   def format_tree(node = @root, prefix = '', output = '', is_left: true)
