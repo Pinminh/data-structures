@@ -9,6 +9,26 @@ class AVLTree
     @root = @sentinel
   end
 
+  def search_node(key)
+    cursor = @root
+    until cursor.sentinel?
+      return cursor if cursor.key == key
+
+      cursor = key < cursor.key ? cursor.left : cursor.right
+    end
+    nil
+  end
+
+  def minimum(node = @root)
+    node = node.left until node.no_left?
+    node
+  end
+
+  def maximum(node = @root)
+    node = node.right until node.no_right?
+    node
+  end
+
   def insert(key, value = key)
     node = InternalNode.new key, value, @sentinel
     cursor = @root
