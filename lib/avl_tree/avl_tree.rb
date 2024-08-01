@@ -53,22 +53,60 @@ class AVLTree
     end
     node.parent = parent
 
-    fix_balance node
+    global_rebalance node
     self
   end
 
+  def delete(node)
+    if node.no_right?
+      affected_node = node.left
+      transplant_to node, node.left
+      affected_node = node.parent if affected_node.sentinel?
+    elsif node.no_left?
+      affected_node = node.right
+      transplant_to node, node.right
+      affected_node = node.parent if affected_node.sentinel?
+    else
+      affected_node = successor = minimum node.right
+      unless successor == node.right
+        affected_node = successor.parent
+        replacement = successor.right
+        transplant_to successor, replacement
+        successor.right = node.right
+        node.right.parent = successor
+      end
+      transplant_to node, successor
+      successor.left = node.left
+      node.left.parent = successor
+    end
+
+    global_rebalance affected_node
+    self
+  end
+
+  # Replace dest_node with src_node (attaching parent)
+  def transplant_to(dest_node, src_node)
+    if dest_node.parent.sentinel?
+      @root = src_node
+    elsif dest_node.left_child?
+      dest_node.parent.left = src_node
+    else
+      dest_node.parent.right = src_node
+    end
+    src_node.parent = dest_node.parent unless src_node.sentinel?
+  end
+
   # Repeatedly restore balance upto the root
-  def fix_balance(node)
-    cursor = node.parent
-    until cursor.sentinel?
-      cursor.update_height
-      cursor = rebalance cursor unless cursor.balanced?
-      cursor = cursor.parent
+  def global_rebalance(node)
+    until node.sentinel?
+      node.update_height
+      node = local_rebalance node unless node.balanced?
+      node = node.parent
     end
   end
 
   # Restore balance at a node locally
-  def rebalance(node)
+  def local_rebalance(node)
     subtree = node
     # When it is the left branch causing unbalance
     if node.left_heavy?
